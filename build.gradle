@@ -42,22 +42,25 @@ ext {
 
 dependencies {
 
-    compile("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
     compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 
-    compile('org.springframework.boot:spring-boot-starter-actuator')
-    compile('org.springframework.boot:spring-boot-actuator-docs')
+    compile("org.jetbrains.kotlin:kotlin-stdlib-jre8:${kotlinVersion}")
+//    compile('org.springframework.boot:spring-boot-starter-actuator')
+//    compile('org.springframework.boot:spring-boot-actuator-docs')
 //	compile('org.springframework.cloud:spring-cloud-starter-hystrix')
 //	compile('org.springframework.cloud:spring-cloud-starter-hystrix-dashboard')
 //	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 //	compile('org.springframework.boot:spring-boot-starter-security')
-//	compile('org.springframework.shell:spring-shell-starter:2.0.0.M2')
     compile('org.springframework.boot:spring-boot-starter-web')
 //	compile('org.springframework.boot:spring-boot-starter-websocket')
     runtime('org.springframework.boot:spring-boot-devtools')
 
     runtime('com.h2database:h2')
     runtime('org.postgresql:postgresql')
+
+    compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.8.10"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.springframework.security:spring-security-test')

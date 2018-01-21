@@ -12,7 +12,7 @@
 Example using `curl`:
 ```bash
 curl \
- -F "filename=bleh" \
+ -F "book=Mustermann's Personal Finances" \
  -F "forceReset=true" \
  -F "file=@/Users/mustermann/Documents/Moneydance-JSON-output.json" \
  http://localhost:8080/import/moneydance/json

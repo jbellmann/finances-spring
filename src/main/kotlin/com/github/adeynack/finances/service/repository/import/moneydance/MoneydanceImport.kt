@@ -12,7 +12,14 @@ class MoneydanceImport(
 
     private val log = LogManager.getLogger(MoneydanceImport::class.java)
 
-    fun import(inputStream: InputStream, filename: String, forceReset: Boolean) {
+    /**
+     * Imports all data from a Moneydance JSON export.
+     * @param inputStream the stream with the JSON content.
+     * @param financeBookName the name the user wants for this book.
+     * @param forceReset if `false` and the book already exists, the import will fail; otherwise,
+     *                   the import will delete everything from this book and then import it.
+     */
+    fun import(inputStream: InputStream, financeBookName: String, forceReset: Boolean) {
         inputStream
             .use { objectMapper.readTree(it) }
             .get("all_items")

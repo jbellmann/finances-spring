@@ -23,12 +23,12 @@ class MoneydanceImportController(
     @PostMapping("json")
     fun importFromMoneydanceJson(
         @RequestParam file: MultipartFile,
-        @RequestParam filename: String,
+        @RequestParam book: String,
         @RequestParam(required = false, defaultValue = "false") forceReset: Boolean
     ): ResponseEntity<ImportResult> {
-        val request = ImportRequest(filename, forceReset)
-        log.info("Importing from Moneydance JSON into file named `$filename`. Forcing reset if file exists: $forceReset.")
-        moneydanceImport.import(file.inputStream, filename, forceReset)
+        val request = ImportRequest(book, forceReset)
+        log.info("Importing from Moneydance JSON into book `$book`. Forcing reset if file exists: $forceReset.")
+        moneydanceImport.import(file.inputStream, book, forceReset)
         return ResponseEntity.ok(ImportResult(request, succeeded = true))
     }
 

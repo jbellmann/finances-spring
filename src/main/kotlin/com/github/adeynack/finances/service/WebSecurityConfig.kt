@@ -1,97 +1,94 @@
 package com.github.adeynack.finances.service
 
+import org.apache.log4j.LogManager
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.AuthenticationException
-import org.springframework.security.web.AuthenticationEntryPoint
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
-import org.springframework.security.web.savedrequest.HttpSessionRequestCache
-import org.springframework.stereotype.Component
-import org.springframework.util.StringUtils
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.stereotype.Repository
+import org.springframework.stereotype.Service
 
 /**
- * From http://www.baeldung.com/securing-a-restful-web-service-with-spring-security#javaconfig
+ * From https://jaxenter.com/rest-api-spring-java-8-112289.html
  */
 @Configuration
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @EnableWebSecurity
-class WebSecurityConfig(
-    private val restAuthenticationEntryPoint: RestAuthenticationEntryPoint,
-    private val authenticationSuccessHandler: MySavedRequestAwareAuthenticationSuccessHandler
+class SecurityConfiguration(
+    private val fakeUserDetailsService: FakeUserDetailsService
 ) : WebSecurityConfigurerAdapter() {
 
+    private val log = LogManager.getLogger(SecurityConfiguration::class.java)
+
+    init {
+        log.info("Initializing.")
+    }
+
     override fun configure(auth: AuthenticationManagerBuilder) {
-        auth.inMemoryAuthentication()
-            .withUser("admin").password("pass").roles("ADMIN")
-            .and()
-            .withUser("user").password("pass").roles("USER")
+        auth.userDetailsService(fakeUserDetailsService)
     }
 
     override fun configure(http: HttpSecurity) {
-        http
-            .csrf().disable()
-            .exceptionHandling()
-            .authenticationEntryPoint(restAuthenticationEntryPoint)
-            .and()
-            .authorizeRequests()
-            .antMatchers("/**").authenticated()
-            .and()
-            .formLogin()
-            .successHandler(authenticationSuccessHandler)
-            .failureHandler(SimpleUrlAuthenticationFailureHandler())
-            .and()
-            .logout()
+        http.authorizeRequests().anyRequest().fullyAuthenticated()
+        http.httpBasic()
+        http.csrf().disable()
     }
 }
 
 /**
- * From http://www.baeldung.com/securing-a-restful-web-service-with-spring-security#ch_3_2
+ * From https://jaxenter.com/rest-api-spring-java-8-112289.html
  */
-@Component
-class RestAuthenticationEntryPoint : AuthenticationEntryPoint {
+@Service
+class FakeUserDetailsService(
+    private val personRepository: PersonRepository
+) : UserDetailsService {
 
-    override fun commence(request: HttpServletRequest, response: HttpServletResponse, authException: AuthenticationException) {
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+    private val log = LogManager.getLogger(FakeUserDetailsService::class.java)
+
+    init {
+        log.info("Initializing.")
+    }
+
+    override fun loadUserByUsername(username: String?): UserDetails {
+        val person = personRepository.findByFirstNameEquals(username)
+        if (person == null) {
+            throw UsernameNotFoundException("Username $username not found")
+        }
+        return User(username, "password", getGrantedAuthorities(username))
+    }
+
+    private fun getGrantedAuthorities(username: String?): Collection<GrantedAuthority> {
+        return if (username == "Johny") {
+            listOf(GrantedAuthority { "ROLE_ADMIN" }, GrantedAuthority { "ROLE_BASIC" })
+        } else {
+            listOf(GrantedAuthority { "ROLE_BASIC" })
+        }
     }
 
 }
 
-/**
- * From http://www.baeldung.com/securing-a-restful-web-service-with-spring-security#ch_3_4
- */
-@Component
-class MySavedRequestAwareAuthenticationSuccessHandler : SimpleUrlAuthenticationSuccessHandler() {
+@Repository
+class PersonRepository {
 
-    private val requestCache = HttpSessionRequestCache()
+    private val log = LogManager.getLogger(PersonRepository::class.java)
 
-    override fun onAuthenticationSuccess(
-        request: HttpServletRequest,
-        response: HttpServletResponse,
-        authentication: Authentication
-    ) {
-        val savedRequest = requestCache.getRequest(request, response)
-        if (savedRequest == null) {
-            clearAuthenticationAttributes(request)
-            return
-        }
+    init {
+        log.info("Initializing.")
+    }
 
-        val targetUrlParam = targetUrlParameter
-        if (
-            isAlwaysUseDefaultTargetUrl ||
-            (targetUrlParam != null && StringUtils.hasText(request.getParameter(targetUrlParam)))
-        ) {
-            requestCache.removeRequest(request, response)
-            clearAuthenticationAttributes(request)
-            return
-        }
-
-        clearAuthenticationAttributes(request)
+    fun findByFirstNameEquals(username: String?): Person? {
+        return username?.let { Person(it) }
     }
 
 }
+
+data class Person(
+    val username: String
+)

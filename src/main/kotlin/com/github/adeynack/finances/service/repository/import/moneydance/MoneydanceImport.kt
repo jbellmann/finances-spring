@@ -8,7 +8,6 @@ import com.github.adeynack.finances.service.repository.AccountRepository
 import com.github.adeynack.finances.service.service.LogService
 import org.springframework.stereotype.Component
 import java.io.InputStream
-import java.time.LocalDate
 
 @Component
 class MoneydanceImport(
@@ -35,24 +34,22 @@ class MoneydanceImport(
         importAccounts(context, elements["acct"] ?: emptyList())
     }
 
+    private fun JsonNode.needText(field: String): String {
+        val f = this.get(field)?.asText()
+        if (f == null || f.isEmpty()) {
+            throw IllegalArgumentException("Account does not have an `id`: ${objectMapper.writeValueAsString(this)}")
+        }
+        return f
+    }
+
     private fun importAccounts(bookContext: BookContext, nodes: List<JsonNode>) {
         log.info("User: ${bookContext.userId} / Book: ${bookContext.bookId} / Adding ${nodes.size} accounts")
         nodes.forEach {
-            fun needText(field: String): String {
-                val f = it.get(field)?.asText()
-                if (f == null || f.isEmpty()) {
-                    throw IllegalArgumentException("Account does not have an `id`: ${objectMapper.writeValueAsString(it)}")
-                }
-                return f
-            }
-
-            val id = needText("id")
+            val id = it.needText("id")
             val parentId = it["parentid"]?.asText()
-            val name = needText("name")
-            val type = needText("type")
-
+            val name = it.needText("name")
+            val type = it.needText("type")
             val account = Account(id, parentId, name, type)
-
             accountRepository.addAccount(bookContext, account)
         }
     }

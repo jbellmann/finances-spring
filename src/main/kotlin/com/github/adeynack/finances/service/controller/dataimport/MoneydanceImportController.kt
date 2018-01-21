@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
-@RequestMapping("import/moneydance")
+@RequestMapping("api/import/moneydance")
 class MoneydanceImportController(
     logService: LogService,
     private val moneydanceImport: MoneydanceImport

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.OffsetDateTime
 
 @RestController
-@RequestMapping("health")
+@RequestMapping("/api/health")
 class HealthController {
 
     data class HealthStatus(

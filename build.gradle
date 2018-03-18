@@ -1,7 +1,7 @@
 buildscript {
     ext {
-        kotlinVersion = '1.2.21'
-        springBootVersion = '1.5.10.RELEASE'
+        kotlinVersion = '1.2.30'
+        springBootVersion = '2.0.0.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -10,7 +10,6 @@ buildscript {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
         classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
-        classpath 'org.springframework:springloaded:1.2.6.RELEASE'
     }
 }
 
@@ -18,6 +17,7 @@ apply plugin: 'kotlin'
 apply plugin: 'kotlin-spring'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
 apply plugin: 'idea'
 
 description = "finances-service"
@@ -26,10 +26,16 @@ version = '0.0.1-SNAPSHOT'
 
 sourceCompatibility = 1.8
 compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions {
+        freeCompilerArgs = ["-Xjsr305=strict"]
+        jvmTarget = "1.8"
+    }
 }
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions {
+        freeCompilerArgs = ["-Xjsr305=strict"]
+        jvmTarget = "1.8"
+    }
 }
 
 repositories {
@@ -38,51 +44,27 @@ repositories {
 }
 
 
-ext {
-    springCloudVersion = 'Edgware.RELEASE'
-}
-
 dependencies {
-
-    compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-
-    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
-//    compile('org.springframework.boot:spring-boot-starter-actuator')
-//    compile('org.springframework.boot:spring-boot-actuator-docs')
-//	compile('org.springframework.cloud:spring-cloud-starter-hystrix')
-//	compile('org.springframework.cloud:spring-cloud-starter-hystrix-dashboard')
-//	compile('org.springframework.boot:spring-boot-starter-data-jpa')
-	compile('org.springframework.boot:spring-boot-starter-security')
-	compile('org.springframework.security.oauth:spring-security-oauth2')
-    compile('org.springframework.boot:spring-boot-starter-web')
-//	compile('org.springframework.boot:spring-boot-starter-websocket')
+    compile('org.springframework.boot:spring-boot-starter-security')
+    compile('org.springframework.boot:spring-boot-starter-webflux')
+    compile("org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:$springBootVersion")
+    compile('com.fasterxml.jackson.module:jackson-module-kotlin')
+    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    compile("org.jetbrains.kotlin:kotlin-reflect")
     runtime('org.springframework.boot:spring-boot-devtools')
-
-    runtime('com.h2database:h2')
-    runtime('org.postgresql:postgresql')
-
-    compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.8.10"
-    compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
-    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
-
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('io.projectreactor:reactor-test')
     testCompile('org.springframework.security:spring-security-test')
 }
 
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-    }
-}
-
 //noinspection GroovyAssignabilityCheck
-tasks.withType(Test) {
-    afterTest { desc, result ->
-        String rt = result.resultType.toString()
-        String successIcon = rt == "SUCCESS" ? "🔹" : rt == "FAILURE" ? "❌" : "🔸️"
-        logger.quiet "ⓣ  ${successIcon}  ${desc.className}#`${desc.name}` : ${rt}"
-    }
-}
+//tasks.withType(Test) {
+//    afterTest { desc, result ->
+//        String rt = result.resultType.toString()
+//        String successIcon = rt == "SUCCESS" ? "🔹" : rt == "FAILURE" ? "❌" : "🔸️"
+//        logger.quiet "ⓣ  ${successIcon}  ${desc.className}#`${desc.name}` : ${rt}"
+//    }
+//}
 
 idea {
     module {

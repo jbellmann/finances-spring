@@ -2,7 +2,12 @@ spring:
   jackson:
     date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
     property-naming-strategy: SNAKE_CASE
-  http:
-    multipart:
-      max-file-size: 50mb
-      max-request-size: 50mb
+#  http:
+#    multipart:
+#      max-file-size: 50mb
+#      max-request-size: 50mb
+security:
+  oauth2:
+    client:
+      client-id: client
+      client-secret: secret

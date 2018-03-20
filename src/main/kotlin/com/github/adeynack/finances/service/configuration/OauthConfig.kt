@@ -16,19 +16,19 @@ http localhost:8080/api/account Authorization:"Bearer 06c7fc44-6552-4d24-a1ef-f2
 
 */
 
-@Configuration
-@EnableAuthorizationServer
-class CustomAuthorizationServerConfigurer
-    : AuthorizationServerConfigurerAdapter() {
-
-    override fun configure(clients: ClientDetailsServiceConfigurer) {
-        clients.inMemory()
-            .withClient("david")
-            .authorizedGrantTypes("password")
-            .secret("{noop}secret")
-            .scopes("all")
-    }
-}
+//@Configuration
+//@EnableAuthorizationServer
+//class CustomAuthorizationServerConfigurer
+//    : AuthorizationServerConfigurerAdapter() {
+//
+//    override fun configure(clients: ClientDetailsServiceConfigurer) {
+//        clients.inMemory()
+//            .withClient("david")
+//            .authorizedGrantTypes("password")
+//            .secret("{noop}secret")
+//            .scopes("all")
+//    }
+//}
 
 //@Configuration
 //@EnableResourceServer
